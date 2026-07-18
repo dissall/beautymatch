@@ -1,0 +1,158 @@
+[
+  {
+    "id": "korean_clear",
+    "name": "韩系清透妆",
+    "description": "水光肌底妆 + 自然眉型 + 渐层唇妆，清透到像没化妆",
+    "suitable": "百搭，尤适合鹅蛋脸、瓜子脸",
+    "keyPoints": ["水光底妆", "一字平眉", "自然眼线", "染唇渐变"],
+    "steps": [
+      { "order": 1, "title": "保湿打底", "description": "充分补水保湿，打造水光肌底子", "tips": "干皮可叠加保湿精华", "products": ["保湿精华", "保湿面霜"] },
+      { "order": 2, "title": "轻薄底妆", "description": "用气垫或轻薄粉底液上妆，少量多次", "tips": "用美妆蛋拍开更服帖", "products": ["气垫BB", "轻薄粉底液"] },
+      { "order": 3, "title": "自然眉妆", "description": "按眉形填充，眉头浅眉尾深", "tips": "眉笔颜色选比发色浅一号", "products": ["眉笔", "眉粉"] },
+      { "order": 4, "title": "清淡眼妆", "description": "单色眼影打底 + 细眼线 + 睫毛膏", "tips": "眼线画内眼线即可", "products": ["大地色眼影", "眼线笔", "睫毛膏"] },
+      { "order": 5, "title": "渐变唇妆", "description": "唇釉点涂唇中，手指晕开", "tips": "由内向外渐变更自然", "products": ["染唇液", "唇釉"] }
+    ]
+  },
+  {
+    "id": "japanese_genki",
+    "name": "日系元气妆",
+    "description": "大面积腮红 + 闪亮眼妆 + 果冻唇，活力满满",
+    "suitable": "圆脸、菱形脸、鹅蛋脸",
+    "keyPoints": ["元气腮红", "闪亮卧蚕", "果冻唇", "柔焦底妆"],
+    "steps": [
+      { "order": 1, "title": "柔焦底妆", "description": "哑光妆前乳 + 散粉定妆，打造柔焦效果", "tips": "T区重点控油", "products": ["控油妆前乳", "散粉"] },
+      { "order": 2, "title": "腮红重点", "description": "从苹果肌向太阳穴斜向推开，大面积晕染", "tips": "膏状腮红更自然持久", "products": ["腮红膏", "腮红刷"] },
+      { "order": 3, "title": "卧蚕提亮", "description": "用珠光眼影提亮卧蚕，放大双眼", "tips": "不要提亮到眼头，会显脏", "products": ["珠光眼影", "小号眼影刷"] },
+      { "order": 4, "title": "果冻唇", "description": "用唇釉打造水润透明感嘴唇", "tips": "选择清透色号，不要厚重", "products": ["果冻唇釉"] }
+    ]
+  },
+  {
+    "id": "contour_3d",
+    "name": "立体修容妆",
+    "description": "强调轮廓阴影 + 高光提亮，塑造立体五官",
+    "suitable": "圆脸、方脸、扁平脸",
+    "keyPoints": ["侧影重点", "鼻影刻画", "高光提亮", "轮廓打底"],
+    "steps": [
+      { "order": 1, "title": "轮廓分析", "description": "观察脸型，确定修容重点区域", "tips": "圆脸重点在下颌和颧骨下方", "products": [] },
+      { "order": 2, "title": "阴影塑造", "description": "在下颌线、颧骨下方、发际线打阴影", "tips": "少量多次，自然过渡最重要", "products": ["修容粉", "修容刷"] },
+      { "order": 3, "title": "鼻影刻画", "description": "从眉头到鼻梁两侧画阴影，鼻梁中间画高光", "tips": "鼻影不要画到鼻翼", "products": ["鼻影刷", "高光粉"] },
+      { "order": 4, "title": "苹果肌高光", "description": "在苹果肌、眉骨、鼻梁、下巴点高光", "tips": "日常妆选自然色高光", "products": ["高光粉", "扇形刷"] }
+    ]
+  },
+  {
+    "id": "euro_mix",
+    "name": "欧美轻混血",
+    "description": "浓密睫毛 + 深邃眼妆 + 裸唇，轻混血感",
+    "suitable": "轮廓分明、眉眼深邃、方脸、瓜子脸",
+    "keyPoints": ["深邃眼窝", "浓密睫毛", "裸色唇", "立体修容"],
+    "steps": [
+      { "order": 1, "title": "眼窝打底", "description": "用暖棕色眼影在眼窝大范围打底", "tips": "晕染范围要超过双眼皮褶", "products": ["暖棕眼影盘", "晕染刷"] },
+      { "order": 2, "title": "截断式眼影", "description": "cut crease手法画出深邃眼窝", "tips": "用遮瑕膏做截断更干净", "products": ["遮瑕膏", "精细刷"] },
+      { "order": 3, "title": "浓密睫毛", "description": "夹翘睫毛 + 纤长睫毛膏或假睫毛", "tips": "亚洲眼型选自然款假睫毛", "products": ["睫毛夹", "纤长睫毛膏", "假睫毛"] },
+      { "order": 4, "title": "裸色唇妆", "description": "用裸色唇线笔勾勒 + 填充裸色唇膏", "tips": "唇峰画明显一点更立体", "products": ["唇线笔", "裸色唇膏"] }
+    ]
+  },
+  {
+    "id": "soft_korean",
+    "name": "柔和韩妆",
+    "description": "温柔低饱和配色 + 柔化轮廓，弱化棱角",
+    "suitable": "方脸、菱形脸、轮廓硬朗的脸型",
+    "keyPoints": ["柔和配色", "弱化下颌", "圆润眉型", "腮红晕染"],
+    "steps": [
+      { "order": 1, "title": "柔和底妆", "description": "轻薄底妆不过度遮瑕，保留肌肤质感", "tips": "用紫色妆前乳调整肤色", "products": ["妆前乳", "轻薄粉底"] },
+      { "order": 2, "title": "圆润眉型", "description": "画略带弧度的弯眉，避免直角挑眉", "tips": "眉头距离稍远更柔和", "products": ["眉笔", "眉刷"] },
+      { "order": 3, "title": "低饱和眼妆", "description": "藕粉/奶茶色系眼影，降低对比度", "tips": "避开浓黑眼线，用棕色替代", "products": ["藕粉眼影", "棕色眼线笔"] },
+      { "order": 4, "title": "横向腮红", "description": "腮红在颧骨处横向推开，柔化面部棱角", "tips": "选杏色或裸粉色腮红", "products": ["杏色腮红"] }
+    ]
+  },
+  {
+    "id": "french_lazy",
+    "name": "法式慵懒妆",
+    "description": "随性不刻意，红唇 + 淡眼 + 野生眉，effortless chic",
+    "suitable": "方脸、菱形脸、鹅蛋脸",
+    "keyPoints": ["野生眉", "红唇重点", "裸感底妆", "简约眼妆"],
+    "steps": [
+      { "order": 1, "title": "裸感底妆", "description": "只遮需要遮的地方，保留雀斑和皮肤纹理", "tips": "用手指上妆更有随意感", "products": ["遮瑕膏", "BB霜"] },
+      { "order": 2, "title": "野生眉", "description": "顺着眉毛生长方向梳理，只用眉胶定型", "tips": "不要修得太整齐", "products": ["眉胶", "眉梳"] },
+      { "order": 3, "title": "简约眼妆", "description": "薄涂一层睫毛膏即可，不画眼影", "tips": "夹翘睫毛是关键", "products": ["睫毛夹", "睫毛膏"] },
+      { "order": 4, "title": "红唇点睛", "description": "正红色唇膏厚涂，是整个妆容的主角", "tips": "用手指点涂更自然随意", "products": ["正红色唇膏"] }
+    ]
+  },
+  {
+    "id": "pure_desire",
+    "name": "纯欲妆",
+    "description": "无辜大眼 + 水润嘟嘟唇 + 粉嫩腮红，又纯又欲",
+    "suitable": "瓜子脸、鹅蛋脸、圆脸",
+    "keyPoints": ["无辜眼线", "眼下腮红", "嘟嘟唇", "奶油肌"],
+    "steps": [
+      { "order": 1, "title": "奶油肌底妆", "description": "打造像奶油一样细腻光滑的底妆", "tips": "妆前乳选带微珠光的", "products": ["珠光妆前乳", "奶油肌粉底"] },
+      { "order": 2, "title": "无辜下垂眼线", "description": "眼线向下拉，打造无辜小狗眼", "tips": "眼尾向下延伸2-3mm即可", "products": ["棕色眼线液笔"] },
+      { "order": 3, "title": "眼下腮红", "description": "腮红打在眼下苹果肌，像自然透出的红晕", "tips": "用粉扑上腮红更自然", "products": ["粉色腮红", "粉扑"] },
+      { "order": 4, "title": "嘟嘟唇", "description": "唇釉涂满 + 透明唇蜜叠加唇中", "tips": "可以稍微涂出唇线一点", "products": ["唇釉", "透明唇蜜"] }
+    ]
+  },
+  {
+    "id": "chinese_classic",
+    "name": "中式古典妆",
+    "description": "柳叶眉 + 凤眼妆 + 点绛唇，东方韵味十足",
+    "suitable": "瓜子脸、鹅蛋脸、丹凤眼",
+    "keyPoints": ["柳叶眉", "凤眼拉长", "点绛唇", "陶瓷肌"],
+    "steps": [
+      { "order": 1, "title": "陶瓷底妆", "description": "哑光白色粉底打造无瑕陶瓷肌", "tips": "用白色散粉定妆更白净", "products": ["哑光粉底", "白色散粉"] },
+      { "order": 2, "title": "柳叶眉", "description": "画细长弯眉，眉尾收尖", "tips": "先用遮瑕盖住多余眉毛", "products": ["眉笔", "遮瑕膏"] },
+      { "order": 3, "title": "凤眼妆", "description": "眼线在眼尾拉长上扬，眼影选红棕色系", "tips": "下眼睑后半段也画眼影", "products": ["红棕眼影", "眼线液笔"] },
+      { "order": 4, "title": "点绛唇", "description": "唇中深唇周浅，打造樱桃小嘴效果", "tips": "选正红或暗红色系", "products": ["正红唇膏", "唇刷"] }
+    ]
+  },
+  {
+    "id": "japanese_blush",
+    "name": "日系腮红妆",
+    "description": "腮红是绝对主角，大面积晕染打造温柔氛围",
+    "suitable": "菱形脸、长脸、圆脸",
+    "keyPoints": ["大面积腮红", "腮红色调和", "简单眼妆", "自然眉"],
+    "steps": [
+      { "order": 1, "title": "腮红打底", "description": "膏状腮红打底，大面积在颧骨到太阳穴推开", "tips": "范围可以到眼尾和颧骨下方", "products": ["腮红膏"] },
+      { "order": 2, "title": "粉状腮红叠加", "description": "同色系粉状腮红叠加，增加层次和持久度", "tips": "选暖色调，杏色/珊瑚色最百搭", "products": ["杏色腮红", "腮红刷"] },
+      { "order": 3, "title": "简单眼妆", "description": "腮红当眼影用，保持整体色调统一", "tips": "用同一块腮红扫过眼皮", "products": ["腮红"] }
+    ]
+  },
+  {
+    "id": "milk_tea",
+    "name": "温柔奶茶妆",
+    "description": "全脸奶茶色系统一，温温柔柔没有攻击性",
+    "suitable": "各种脸型，百搭日常",
+    "keyPoints": ["奶茶色调", "全脸同色系", "柔和过渡", "低调光泽"],
+    "steps": [
+      { "order": 1, "title": "奶茶色底妆", "description": "选贴近肤色的自然粉底，不追求过白", "tips": "粉底色号选脖子颜色", "products": ["自然色粉底"] },
+      { "order": 2, "title": "奶茶色眼妆", "description": "哑光奶茶色眼影大面积打底，加深眼尾", "tips": "亮片色只点涂眼皮中央", "products": ["奶茶色眼影盘"] },
+      { "order": 3, "title": "奶茶色腮红+唇", "description": "腮红和唇色同色系，保持整脸和谐", "tips": "腮红位置偏上更显气质", "products": ["奶茶色腮红", "奶茶色唇膏"] },
+      { "order": 4, "title": "定妆", "description": "全脸定妆喷雾收尾，保持光泽感", "tips": "不要用散粉会破坏光泽", "products": ["定妆喷雾"] }
+    ]
+  },
+  {
+    "id": "cute_age",
+    "name": "可爱减龄妆",
+    "description": "卧蚕 + 圆形腮红 + 光泽嘟嘟唇，秒回18岁",
+    "suitable": "长脸、菱形脸、任何想显年轻的脸型",
+    "keyPoints": ["卧蚕重点", "圆形腮红", "宽眼距效果", "嘟嘟唇"],
+    "steps": [
+      { "order": 1, "title": "提亮眼周", "description": "用浅色遮瑕提亮眼下三角区", "tips": "提亮范围大一点更显年轻", "products": ["浅色遮瑕"] },
+      { "order": 2, "title": "卧蚕加强", "description": "画明显卧蚕，眼睛立刻放大一倍", "tips": "卧蚕阴影用眉笔画更自然", "products": ["眉笔", "珠光卧蚕笔"] },
+      { "order": 3, "title": "圆形腮红", "description": "腮红画圆形在苹果肌中央，不要斜扫", "tips": "笑起来找到苹果肌最高点", "products": ["粉色腮红"] },
+      { "order": 4, "title": "光泽唇", "description": "水光唇釉打造嘟嘟效果", "tips": "唇峰也上一点唇蜜更立体", "products": ["水光唇釉"] }
+    ]
+  },
+  {
+    "id": "horizontal_blush",
+    "name": "横向腮红妆",
+    "description": "腮红横向打，视觉上缩短中庭长度",
+    "suitable": "长脸、中庭偏长",
+    "keyPoints": ["横向腮红", "下眼影重点", "鼻下阴影", "上唇线提高"],
+    "steps": [
+      { "order": 1, "title": "横向腮红", "description": "腮红从鼻梁横向打到颧骨，连接左右脸", "tips": "选自然杏色，像晒伤妆的感觉", "products": ["杏色腮红", "大号腮红刷"] },
+      { "order": 2, "title": "下眼影", "description": "加强下眼影，视觉下移面部重心", "tips": "下眼影用暖色系更柔和", "products": ["下眼影刷", "暖色眼影"] },
+      { "order": 3, "title": "鼻下阴影", "description": "鼻小柱下方打阴影，视觉缩短鼻子", "tips": "阴影要淡，自然最重要", "products": ["小号修容刷", "修容粉"] },
+      { "order": 4, "title": "上唇线提高", "description": "上唇线超出原唇线2mm画，缩短人中", "tips": "用唇线笔比唇膏更精准", "products": ["唇线笔"] }
+    ]
+  }
+]
