@@ -1,8 +1,9 @@
 import * as faceapi from 'face-api.js';
 import type { FaceLandmark, Proportions, FaceMeasurements } from '@/types';
 
-// Model files are organized in subdirectories under /models/
-const MODEL_BASE = '/models';
+// Model files are organized in subdirectories under public/models/
+// Use Vite's BASE_URL so it works on both dev server and GitHub Pages subpath
+const MODEL_BASE = `${import.meta.env.BASE_URL}models`;
 const SSD_URL = `${MODEL_BASE}/ssd_mobilenetv1`;
 const LANDMARK_URL = `${MODEL_BASE}/face_landmark_68`;
 const RECOG_URL = `${MODEL_BASE}/face_recognition`;

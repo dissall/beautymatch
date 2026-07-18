@@ -117,9 +117,9 @@ export default function PhotoUploader() {
                 ref={cameraInputRef}
                 type="file"
                 accept="image/*"
-                capture="user"
+                capture="environment"
                 multiple
-                className="hidden"
+                className="fixed -top-20 -left-20 w-0 h-0 opacity-0"
                 onChange={handleCameraFile}
               />
             </div>
