@@ -1,6 +1,7 @@
-import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '@/components/common/Button';
+import { useAppStore } from '@/store/useAppStore';
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -8,6 +9,13 @@ const fadeUp = {
 };
 
 export default function HomePage() {
+  const navigate = useNavigate();
+  const { history, analysisResult, removeFromHistory, restoreFromHistory } = useAppStore();
+
+  // Show history if there are saved reports OR a current analysis exists
+  const hasCurrent = !!analysisResult;
+  const pastHistory = history.filter((r) => r.id !== analysisResult?.id);
+  const showHistory = hasCurrent || pastHistory.length > 0;
   return (
     <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4">
       {/* Hero */}
@@ -137,13 +145,45 @@ export default function HomePage() {
         </div>
       </motion.div>
 
+      {/* History Section */}
+      {showHistory && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4 }} className="max-w-4xl mx-auto mt-16">
+          <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">📋 我的报告</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Current analysis */}
+            {hasCurrent && analysisResult && (
+              <div className="bg-white rounded-2xl p-4 shadow-lg shadow-pink-100/50 border-2 border-pink-300 cursor-pointer hover:shadow-xl transition-all" onClick={() => navigate('/report')}>
+                <div className="flex items-center gap-3 mb-2">
+                  {analysisResult.imageDataUrl && (
+                    <img src={analysisResult.imageDataUrl} className="w-12 h-12 rounded-xl object-cover" alt="" />
+                  )}
+                  <div className="min-w-0">
+                    <p className="font-bold text-gray-800 text-sm truncate">当前分析结果</p>
+                    <p className="text-xs text-pink-400">
+                      {new Date(analysisResult.createdAt).toLocaleDateString('zh-CN')}
+                      {analysisResult._confidence && ` · ${analysisResult._confidence}%`}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-400 truncate">{analysisResult.compliment?.slice(0, 40)}...</p>
+              </div>
+            )}
+            {/* Past history */}
+            {pastHistory.slice(0, hasCurrent ? 5 : 6).map((r) => (
+              <div key={r.id} className="bg-white rounded-2xl p-4 shadow-sm border border-pink-100 cursor-pointer hover:shadow-lg hover:border-pink-300 transition-all group" onClick={() => { restoreFromHistory(r.id); navigate('/report'); }}>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="font-semibold text-gray-800 text-sm truncate">{new Date(r.createdAt).toLocaleDateString('zh-CN')}</p>
+                  <button onClick={(e) => { e.stopPropagation(); removeFromHistory(r.id); }} className="text-gray-300 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
+                </div>
+                <p className="text-xs text-gray-400 line-clamp-2">{r.compliment?.slice(0, 60)}...</p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
       {/* CTA */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.6 }}
-        className="text-center mt-16 mb-12"
-      >
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }} className="text-center mt-16 mb-12">
         <Link to="/upload">
           <Button size="lg" icon="✨">
             免费开始使用

@@ -1,16 +1,21 @@
 import { create } from 'zustand';
 import type { AnalysisResult, Blogger } from '@/types';
 
+const HISTORY_KEY = 'beautymatch_history';
+const CURRENT_KEY = 'beautymatch_current';
+const IMAGE_KEY = 'beautymatch_image';
+
 interface AppState {
-  // 上传的图片
   uploadedImage: string | null;
   setUploadedImage: (image: string | null) => void;
 
-  // 分析结果
   analysisResult: AnalysisResult | null;
   setAnalysisResult: (result: AnalysisResult | null) => void;
+  /** Save current result to history and localStorage */
+  saveCurrentResult: () => void;
+  /** Restore a result from history (sets it as current) */
+  restoreFromHistory: (id: string) => void;
 
-  // 分析状态
   isAnalyzing: boolean;
   setIsAnalyzing: (v: boolean) => void;
   analysisProgress: number;
@@ -18,23 +23,59 @@ interface AppState {
   analysisMessage: string;
   setAnalysisMessage: (v: string) => void;
 
-  // 历史记录（localStorage 持久化）
   history: AnalysisResult[];
   addToHistory: (result: AnalysisResult) => void;
+  removeFromHistory: (id: string) => void;
   clearHistory: () => void;
   loadHistory: () => void;
 
-  // 博主数据
   bloggers: Blogger[];
   setBloggers: (bloggers: Blogger[]) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-  uploadedImage: null,
-  setUploadedImage: (image) => set({ uploadedImage: image }),
+  uploadedImage: (() => {
+    try { return localStorage.getItem(IMAGE_KEY); } catch { return null; }
+  })(),
+  setUploadedImage: (image) => {
+    set({ uploadedImage: image });
+    try {
+      if (image) localStorage.setItem(IMAGE_KEY, image);
+      else localStorage.removeItem(IMAGE_KEY);
+    } catch { /* quota exceeded */ }
+  },
 
-  analysisResult: null,
-  setAnalysisResult: (result) => set({ analysisResult: result }),
+  analysisResult: (() => {
+    try {
+      const data = localStorage.getItem(CURRENT_KEY);
+      return data ? JSON.parse(data) : null;
+    } catch { return null; }
+  })(),
+  setAnalysisResult: (result) => {
+    set({ analysisResult: result });
+    // Auto-persist to localStorage
+    try {
+      if (result) {
+        localStorage.setItem(CURRENT_KEY, JSON.stringify(result));
+      } else {
+        localStorage.removeItem(CURRENT_KEY);
+      }
+    } catch { /* quota exceeded */ }
+  },
+  saveCurrentResult: () => {
+    const { analysisResult, addToHistory } = get();
+    if (analysisResult) {
+      addToHistory({ ...analysisResult });
+    }
+  },
+  restoreFromHistory: (id) => {
+    const { history } = get();
+    const found = history.find((r) => r.id === id);
+    if (found) {
+      set({ analysisResult: { ...found } });
+      try { localStorage.setItem(CURRENT_KEY, JSON.stringify(found)); } catch {}
+    }
+  },
 
   isAnalyzing: false,
   setIsAnalyzing: (v) => set({ isAnalyzing: v }),
@@ -46,23 +87,26 @@ export const useAppStore = create<AppState>((set, get) => ({
   history: [],
   addToHistory: (result) => {
     const current = get().history;
-    const updated = [result, ...current].slice(0, 20); // 最多保留20条
+    // Deduplicate by id
+    const filtered = current.filter((r) => r.id !== result.id);
+    const updated = [{ ...result, _savedAt: Date.now() } as any, ...filtered].slice(0, 30);
     set({ history: updated });
-    localStorage.setItem('beautymatch_history', JSON.stringify(updated));
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(updated)); } catch {}
+  },
+  removeFromHistory: (id) => {
+    const updated = get().history.filter((r) => r.id !== id);
+    set({ history: updated });
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(updated)); } catch {}
   },
   clearHistory: () => {
     set({ history: [] });
-    localStorage.removeItem('beautymatch_history');
+    try { localStorage.removeItem(HISTORY_KEY); } catch {}
   },
   loadHistory: () => {
     try {
-      const data = localStorage.getItem('beautymatch_history');
-      if (data) {
-        set({ history: JSON.parse(data) });
-      }
-    } catch {
-      // ignore
-    }
+      const data = localStorage.getItem(HISTORY_KEY);
+      if (data) set({ history: JSON.parse(data) });
+    } catch {}
   },
 
   bloggers: [],

@@ -142,6 +142,14 @@ export interface AnalysisResult {
   compliment: string;
   aiCompliment?: string;
   granularRecommendations?: PartRecommendationRef[];
+  /** 多图投票: 上传照片数 */
+  _photoCount?: number;
+  /** 多图投票: 成功识别数 */
+  _successCount?: number;
+  /** 多图投票: 综合置信度 0-100 */
+  _confidence?: number;
+  _userCorrected?: boolean;
+  _savedAt?: number;
 }
 
 /** Lightweight reference for granular recs (avoids circular imports) */

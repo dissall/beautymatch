@@ -12,6 +12,7 @@ import BloggerMatches from '@/components/report/BloggerMatches';
 import ComplimentText from '@/components/report/ComplimentText';
 import LandmarkOverlay from '@/components/report/LandmarkOverlay';
 import MeasurementsTable from '@/components/report/MeasurementsTable';
+import FeatureCorrector from '@/components/report/FeatureCorrector';
 import Button from '@/components/common/Button';
 import { exportReportToPDF, encodeResultToHash } from '@/services/pdfExport';
 
@@ -91,19 +92,24 @@ export default function ReportPage() {
         <ReportHeader result={analysisResult} />
 
         <div className="mt-8 space-y-10">
-          {/* AI Compliment badge */}
-          {analysisResult.aiCompliment && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="flex justify-center"
-            >
+          {/* Badges row */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-wrap justify-center gap-3">
+            {analysisResult.aiCompliment && (
               <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-full px-4 py-1.5 text-xs text-purple-600 font-medium">
-                🤖 AI 为你专属生成 · 每人都不一样
+                🤖 AI 为你专属生成
               </span>
-            </motion.div>
-          )}
+            )}
+            {analysisResult._confidence !== undefined && (
+              <span className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium border ${
+                analysisResult._confidence >= 80 ? 'bg-green-50 border-green-200 text-green-600' :
+                analysisResult._confidence >= 50 ? 'bg-yellow-50 border-yellow-200 text-yellow-600' :
+                'bg-red-50 border-red-200 text-red-600'
+              }`}>
+                🎯 识别置信度 {analysisResult._confidence}%
+                {analysisResult._photoCount && analysisResult._photoCount > 1 && `（${analysisResult._successCount}/${analysisResult._photoCount} 张照片投票）`}
+              </span>
+            )}
+          </motion.div>
 
           {/* ===== AI Landmark Overlay ===== */}
           {analysisResult.landmarks.length > 0 && (

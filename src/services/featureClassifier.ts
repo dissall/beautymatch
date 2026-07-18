@@ -3,192 +3,261 @@ import type {
   Jawline, Cheekbone, BrowDistance, Philtrum, FaceFeatures, FaceLandmark, Proportions,
 } from '@/types';
 
-/**
- * 脸型判别算法
- * 基于68点特征测量面部宽高比、下颌宽度、颧骨宽度等
- */
-export function classifyFaceShape(landmarks: FaceLandmark[]): FaceShape {
-  const jawWidth = Math.abs(landmarks[15].x - landmarks[1].x);
-  const cheekWidth = Math.abs(landmarks[14].x - landmarks[2].x);
-  const foreheadWidth = Math.abs(landmarks[24].x - landmarks[19].x);
-  const faceHeight = Math.abs(landmarks[8].y - landmarks[27].y);
+// ============================================================
+// 脸型判别 — 双方法投票
+// ============================================================
 
-  const ratio = faceHeight / cheekWidth;
-  const jawCheekRatio = jawWidth / cheekWidth;
-  const foreheadCheekRatio = foreheadWidth / cheekWidth;
+/** 方法1: 基于比例的面部测量法（更精确） */
+function classifyFaceShapeByRatios(lm: FaceLandmark[]): FaceShape {
+  const faceWidth = Math.abs(lm[16].x - lm[0].x);
+  const faceHeight = Math.abs(lm[8].y - lm[27].y);
+  const jawWidth = Math.abs(lm[15].x - lm[1].x);
+  const cheekWidth = Math.abs(lm[14].x - lm[2].x);
+  const foreheadWidth = Math.abs(lm[24].x - lm[19].x);
+  const chinToJaw = Math.abs(lm[8].y - lm[7].y);
 
-  // 菱形脸：颧骨最宽，下颌和额头明显收窄
-  if (foreheadCheekRatio < 0.82 && jawCheekRatio < 0.82 && cheekWidth > jawWidth && cheekWidth > foreheadWidth) {
+  const whRatio = faceHeight / Math.max(faceWidth, 1);
+  const jawCheekRatio = jawWidth / Math.max(cheekWidth, 1);
+  const foreheadCheekRatio = foreheadWidth / Math.max(cheekWidth, 1);
+  const chinSharpness = chinToJaw / Math.max(jawWidth, 1);
+
+  // 菱形脸：颧骨显著宽于额头和下颌
+  if (foreheadCheekRatio < 0.83 && jawCheekRatio < 0.83 && cheekWidth > foreheadWidth + 8 && cheekWidth > jawWidth + 8) {
     return 'diamond';
   }
-
-  // 瓜子脸/心形脸：额头宽，下巴尖
-  if (foreheadWidth > jawWidth * 1.15 && jawWidth / cheekWidth < 0.8) {
+  // 瓜子脸：额头宽 → 下巴窄，V型明显
+  if (foreheadWidth > jawWidth * 1.12 && jawCheekRatio < 0.82 && chinSharpness < 0.28) {
     return 'heart';
   }
-
-  // 方脸：宽高比接近1，下颌线分明
-  if (ratio > 0.82 && ratio < 1.2 && jawCheekRatio > 0.9) {
+  // 方脸：下颌与颧骨接近，面宽高比接近1
+  if (jawCheekRatio > 0.90 && whRatio > 0.82 && whRatio < 1.22 && chinSharpness > 0.35) {
     return 'square';
   }
-
-  // 圆脸：宽高比接近1，但下颌线圆润
-  if (ratio > 0.82 && ratio < 1.1 && jawCheekRatio > 0.85) {
-    return 'round';
-  }
-
-  // 长脸：高度明显大于宽度
-  if (ratio > 1.25) {
+  // 长脸：高宽比大
+  if (whRatio > 1.28) {
     return 'long';
   }
-
+  // 圆脸：高宽比接近1，下颌圆润
+  if (whRatio > 0.82 && whRatio < 1.15 && jawCheekRatio > 0.84 && chinSharpness < 0.32) {
+    return 'round';
+  }
   // 鹅蛋脸：黄金比例
   return 'oval';
 }
 
-/**
- * 眼型判别
- * 基于眼睛关键点(36-41左眼, 42-47右眼)的几何特征
- */
+/** 方法2: 基于关键点距离的角度分析法 */
+function classifyFaceShapeByAngles(lm: FaceLandmark[]): FaceShape {
+  const faceWidth = Math.abs(lm[16].x - lm[0].x);
+  const faceHeight = Math.abs(lm[8].y - lm[27].y);
+  const jawWidth = Math.abs(lm[15].x - lm[1].x);
+  const cheekWidth = Math.abs(lm[14].x - lm[2].x);
+  const foreheadWidth = Math.abs(lm[24].x - lm[19].x);
+
+  // 计算下颌线角度（从耳下到下巴）
+  const leftJawAngle = Math.atan2(lm[8].y - lm[5].y, lm[5].x - lm[8].x);
+  const rightJawAngle = Math.atan2(lm[8].y - lm[11].y, lm[8].x - lm[11].x);
+  const avgJawAngle = (Math.abs(leftJawAngle) + Math.abs(rightJawAngle)) / 2;
+
+  // 下颌角度越锐利 → V脸/瓜子脸
+  // 下颌角度越圆钝 → 圆脸/方脸
+  const jawForeheadDiff = foreheadWidth - jawWidth;
+  const cheekJawDiff = cheekWidth - jawWidth;
+
+  // 菱形脸判断：颧骨突出
+  if (cheekJawDiff > 15 && cheekWidth > foreheadWidth + 5) return 'diamond';
+
+  // 瓜子脸/心形：额头最宽，下巴很窄
+  if (jawForeheadDiff > 12 && avgJawAngle < 0.65) return 'heart';
+
+  // 方脸：下颌宽，角度大
+  if (jawWidth > foreheadWidth * 0.92 && avgJawAngle > 0.78) return 'square';
+
+  // 长脸
+  if (faceHeight / faceWidth > 1.28) return 'long';
+
+  // 圆脸
+  if (faceHeight / faceWidth < 1.12 && jawWidth > foreheadWidth * 0.85 && avgJawAngle > 0.62) return 'round';
+
+  return 'oval';
+}
+
+/** 综合判定：两种方法投票，意见一致直接通过，不一致用比例法（更可靠） */
+export function classifyFaceShape(landmarks: FaceLandmark[]): FaceShape {
+  const r1 = classifyFaceShapeByRatios(landmarks);
+  const r2 = classifyFaceShapeByAngles(landmarks);
+
+  if (r1 === r2) return r1;
+
+  // 不一致时：比例法为主，但对边界情况进行二次判断
+  const faceHeight = Math.abs(landmarks[8].y - landmarks[27].y);
+  const faceWidth = Math.abs(landmarks[16].x - landmarks[0].x);
+  const ratio = faceHeight / Math.max(faceWidth, 1);
+
+  // 如果比例法说long但角度法说oval，看具体比例
+  if ((r1 === 'long' || r2 === 'long') && ratio > 1.25) return 'long';
+  if ((r1 === 'round' || r2 === 'round') && ratio < 1.12) return 'round';
+  if ((r1 === 'square' || r2 === 'square') && Math.abs(landmarks[15].x - landmarks[1].x) / faceWidth > 0.88) return 'square';
+
+  // 默认信任比例法
+  return r1;
+}
+
+// ============================================================
+// 眼型判别 — 增强版
+// ============================================================
 export function classifyEyeShape(landmarks: FaceLandmark[]): EyeShape {
   const leftEye = landmarks.slice(36, 42);
   const rightEye = landmarks.slice(42, 48);
 
-  // 取平均眼型
-  const avgEyeHeight = (
-    ((leftEye[4].y - leftEye[1].y + leftEye[5].y - leftEye[2].y) / 2) +
-    ((rightEye[4].y - rightEye[1].y + rightEye[5].y - rightEye[2].y) / 2)
+  // 平均眼高（取多处测量）
+  const leftEyeHeight = (
+    Math.abs(leftEye[1].y - leftEye[4].y) +  // 上缘→下缘
+    Math.abs(leftEye[2].y - leftEye[5].y)    // 第二组
   ) / 2;
+  const rightEyeHeight = (
+    Math.abs(rightEye[1].y - rightEye[4].y) +
+    Math.abs(rightEye[2].y - rightEye[5].y)
+  ) / 2;
+  const avgEyeHeight = (leftEyeHeight + rightEyeHeight) / 2;
 
   const avgEyeWidth = (
-    (leftEye[3].x - leftEye[0].x) + (rightEye[3].x - rightEye[0].x)
+    Math.abs(leftEye[3].x - leftEye[0].x) +
+    Math.abs(rightEye[3].x - rightEye[0].x)
   ) / 2;
 
-  const eyeRatio = avgEyeHeight / avgEyeWidth;
+  const eyeRatio = avgEyeWidth > 0 ? avgEyeHeight / avgEyeWidth : 0.3;
 
-  // 外眼角与内眼角的相对位置
+  // 外眼角 vs 内眼角的Y轴差
   const leftCant = leftEye[3].y - leftEye[0].y;
   const rightCant = rightEye[3].y - rightEye[0].y;
   const avgCant = (leftCant + rightCant) / 2;
 
-  // 上挑眼：外眼角明显高于内眼角
-  if (avgCant < -3) return 'upturned';
+  // 上挑眼：外眼角明显高于内眼角（负值因为Y轴向下）
+  if (avgCant < -4.5) return 'upturned';
   // 下垂眼：外眼角明显低于内眼角
-  if (avgCant > 4) return 'droopy';
+  if (avgCant > 5) return 'droopy';
   // 丹凤眼：窄长 + 微挑
-  if (eyeRatio < 0.28 && avgCant < -1) return 'phoenix';
-  // 桃花眼：较大 + 微弯
-  if (eyeRatio > 0.38 && avgCant < 0) return 'peach';
+  if (eyeRatio < 0.30 && avgCant < -1.5) return 'phoenix';
+  // 桃花眼：较宽 + 微挑/水平
+  if (eyeRatio > 0.36 && avgCant < 1) return 'peach';
   // 圆眼：高宽比大
-  if (eyeRatio > 0.36) return 'round';
-  // 杏仁眼：黄金比例
+  if (eyeRatio > 0.34) return 'round';
+  // 杏仁眼
   return 'almond';
 }
 
-/**
- * 鼻型判别
- */
+// ============================================================
+// 鼻型判别 — 增强版（多点参考 + 鼻翼鼻梁综合判断）
+// ============================================================
 export function classifyNoseShape(landmarks: FaceLandmark[]): NoseShape {
   const noseWidth = Math.abs(landmarks[35].x - landmarks[31].x);
   const noseHeight = Math.abs(landmarks[33].y - landmarks[27].y);
-  const noseBridge = Math.abs(landmarks[30].y - landmarks[27].y);
+  const noseBridgeWidth = Math.abs(landmarks[30].x - landmarks[28].x);
+  const noseTipToBase = Math.abs(landmarks[33].y - landmarks[30].y);
 
-  const widthHeightRatio = noseWidth / noseHeight;
-  const bridgeRatio = noseBridge / noseHeight;
+  // 鼻翼宽度比（鼻翼 vs 鼻梁）
+  const wingBridgeRatio = noseWidth / Math.max(noseBridgeWidth, 1);
+  const widthHeightRatio = noseWidth / Math.max(noseHeight, 1);
 
-  // 鹰钩鼻：鼻梁明显弯曲
-  if (bridgeRatio > 0.6 && landmarks[30].y > (landmarks[27].y + landmarks[33].y) / 2 + 5) {
-    return 'aquiline';
-  }
-  // 蒜头鼻：鼻翼宽
-  if (widthHeightRatio > 1.05) return 'bulbous';
-  // 朝天鼻：鼻尖上翘
-  if (landmarks[33].y < landmarks[31].y && landmarks[33].y < landmarks[35].y) {
-    return 'upturned_nose';
-  }
-  // 塌鼻：鼻梁低平
-  if (bridgeRatio < 0.42) return 'flat';
+  // 鼻尖位置（相对于鼻翼）
+  const noseTipY = landmarks[33].y;
+  const leftWingY = landmarks[31].y;
+  const rightWingY = landmarks[35].y;
+  const wingAvgY = (leftWingY + rightWingY) / 2;
 
+  // 朝天鼻：鼻尖明显高于鼻翼（Y值更小）
+  if (noseTipY < wingAvgY - 4) return 'upturned_nose';
+
+  // 鹰钩鼻：鼻梁有明显弯曲 + 鼻尖下钩
+  const bridgeCurve = (
+    Math.abs(landmarks[28].y - (landmarks[27].y + landmarks[30].y) / 2)
+  );
+  if (bridgeCurve > 3.5 && noseTipToBase > noseHeight * 0.45) return 'aquiline';
+
+  // 蒜头鼻：鼻翼宽大
+  if (wingBridgeRatio > 2.2 || widthHeightRatio > 1.1) return 'bulbous';
+
+  // 塌鼻：鼻梁低平（鼻梁宽度接近鼻翼宽度，鼻高小）
+  if (noseHeight < noseWidth * 1.15 && wingBridgeRatio < 1.8) return 'flat';
+
+  // 标准鼻
   return 'standard';
 }
 
-/**
- * 唇型判别
- */
+// ============================================================
+// 唇型判别
+// ============================================================
 export function classifyLipShape(landmarks: FaceLandmark[]): LipShape {
   const outerLip = landmarks.slice(48, 60);
 
   const lipWidth = Math.abs(outerLip[6].x - outerLip[0].x);
   const lipHeight = Math.abs(
-    (outerLip[2].y + outerLip[3].y) / 2 - (outerLip[9].y + outerLip[8].y) / 2
+    Math.max(outerLip[2].y, outerLip[3].y) - Math.min(outerLip[9].y, outerLip[8].y)
   );
-  const upperLip = Math.abs(outerLip[2].y - outerLip[3].y);
 
-  const ratio = lipHeight / lipWidth;
+  const ratio = lipHeight / Math.max(lipWidth, 1);
 
-  // 薄唇
+  // 嘴角上扬还是下垂
+  const leftCorner = outerLip[0];
+  const rightCorner = outerLip[6];
+  const lipCenter = outerLip[3]; // 上唇中点
+
   if (ratio < 0.22) return 'thin';
-  // 厚唇
-  if (ratio > 0.42) return 'thick';
-  // 微笑唇：嘴角微微上扬
-  if (outerLip[0].y > outerLip[6].y && outerLip[6].y > outerLip[3].y && outerLip[0].y > outerLip[3].y) {
-    return 'smiling';
-  }
-  // 下垂唇：嘴角下垂
-  if (outerLip[0].y < outerLip[6].y - 3) return 'droopy_lip';
+  if (ratio > 0.40) return 'thick';
+
+  // 微笑唇：嘴角高于唇中
+  if (leftCorner.y < lipCenter.y - 2 && rightCorner.y < lipCenter.y - 2) return 'smiling';
+
+  // 下垂唇：嘴角低于唇中
+  if (leftCorner.y > lipCenter.y + 3 || rightCorner.y > lipCenter.y + 3) return 'droopy_lip';
 
   return 'standard';
 }
 
-/**
- * 肤色判别
- * 基于RGB值的色相和亮度
- */
+// ============================================================
+// 肤色判别
+// ============================================================
 export function classifySkinTone(rgb: { r: number; g: number; b: number }): SkinTone {
   const { r, g, b } = rgb;
-
-  // 亮度
-  const brightness = (r + g + b) / 3;
-
-  // 红蓝比判断冷暖
-  const redBlueRatio = r / Math.max(b, 1);
-  const greenRedRatio = g / Math.max(r, 1);
+  const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+  const saturation = (Math.max(r, g, b) - Math.min(r, g, b)) / Math.max(Math.max(r, g, b), 1);
 
   // 小麦色：整体偏暗
-  if (brightness < 140) return 'wheat';
+  if (brightness < 135) return 'wheat';
 
-  // 暖黄皮：黄调明显
-  if (greenRedRatio > 0.88 && redBlueRatio < 1.25) return 'warm_yellow';
-
-  // 冷白皮：偏蓝/偏粉
-  if (redBlueRatio > 1.35 && brightness > 180) return 'cool_white';
+  // 冷白皮：偏蓝/偏粉，高亮度
+  if (r > b * 1.08 && brightness > 175 && saturation < 0.15) return 'cool_white';
 
   // 暖白皮：偏暖但白皙
-  if (brightness > 180 && redBlueRatio > 1.15) return 'warm_white';
+  if (brightness > 170 && g > b * 1.02) return 'warm_white';
+
+  // 暖黄皮：黄调明显
+  if (g > b * 1.05 && brightness > 140) return 'warm_yellow';
 
   // 中性皮
-  if (Math.abs(r - g) < 15 && Math.abs(g - b) < 15 && brightness > 160) return 'neutral';
+  if (Math.abs(r - g) < 18 && Math.abs(g - b) < 18 && brightness > 155) return 'neutral';
 
   return 'warm_yellow';
 }
 
-/**
- * 下颌线判别
- */
+// ============================================================
+// 下颌线判别
+// ============================================================
 export function classifyJawline(landmarks: FaceLandmark[]): Jawline {
   const jawWidth = Math.abs(landmarks[15].x - landmarks[1].x);
   const cheekWidth = Math.abs(landmarks[14].x - landmarks[2].x);
+  const ratio = jawWidth / Math.max(cheekWidth, 1);
 
-  const ratio = jawWidth / cheekWidth;
+  // 计算下颌拐角角度
+  const leftAngle = Math.abs(Math.atan2(landmarks[5].y - landmarks[7].y, landmarks[5].x - landmarks[7].x));
+  const rightAngle = Math.abs(Math.atan2(landmarks[11].y - landmarks[9].y, landmarks[11].x - landmarks[9].x));
+  const avgAngle = (leftAngle + rightAngle) / 2;
 
-  if (ratio < 0.75) return 'v_shape';
-  if (ratio > 0.92) return 'angular';
+  if (ratio < 0.75 || avgAngle < 0.5) return 'v_shape';
+  if (ratio > 0.90 || avgAngle > 0.85) return 'angular';
   return 'round';
 }
 
-/**
- * 颧骨判别
- */
 export function classifyCheekbone(landmarks: FaceLandmark[]): Cheekbone {
   const cheekWidth = Math.abs(landmarks[14].x - landmarks[2].x);
   const jawWidth = Math.abs(landmarks[15].x - landmarks[1].x);
@@ -197,43 +266,44 @@ export function classifyCheekbone(landmarks: FaceLandmark[]): Cheekbone {
   const cheekToJaw = cheekWidth / Math.max(jawWidth, 1);
   const cheekToForehead = cheekWidth / Math.max(foreheadWidth, 1);
 
-  if (cheekToJaw > 1.2 || cheekToForehead > 1.15) return 'prominent';
-  if (cheekToJaw < 1.02 && cheekToForehead < 1.02) return 'flat';
+  if (cheekToJaw > 1.18 || cheekToForehead > 1.13) return 'prominent';
+  if (cheekToJaw < 1.03 && cheekToForehead < 1.03) return 'flat';
   return 'moderate';
 }
 
-/**
- * 眉眼距判别
- */
 export function classifyBrowDistance(landmarks: FaceLandmark[]): BrowDistance {
-  const leftBrowBottom = Math.max(landmarks[17].y, landmarks[18].y, landmarks[19].y, landmarks[20].y, landmarks[21].y);
-  const rightEyeTop = Math.min(landmarks[36].y, landmarks[37].y, landmarks[38].y, landmarks[39].y, landmarks[40].y, landmarks[41].y);
-  const distance = rightEyeTop - leftBrowBottom;
+  const browBottom = Math.max(
+    landmarks[17].y, landmarks[18].y, landmarks[19].y, landmarks[20].y, landmarks[21].y
+  );
+  const eyeTop = Math.min(
+    landmarks[36].y, landmarks[37].y, landmarks[38].y, landmarks[39].y, landmarks[40].y, landmarks[41].y
+  );
+  const distance = eyeTop - browBottom;
 
-  if (distance < 8) return 'close';
-  if (distance > 20) return 'far';
+  // 用眼高做归一化
+  const eyeHeight = Math.abs(landmarks[37].y - landmarks[40].y);
+  const normalizedDistance = eyeHeight > 0 ? distance / eyeHeight : 1;
+
+  if (normalizedDistance < 0.6) return 'close';
+  if (normalizedDistance > 1.5) return 'far';
   return 'moderate';
 }
 
-/**
- * 人中判别
- */
 export function classifyPhiltrum(landmarks: FaceLandmark[]): Philtrum {
   const noseBottom = landmarks[33].y;
   const upperLip = landmarks[51].y;
   const philtrumHeight = upperLip - noseBottom;
-
   const faceHeight = landmarks[8].y - landmarks[27].y;
-  const ratio = philtrumHeight / faceHeight;
+  const ratio = faceHeight > 0 ? philtrumHeight / faceHeight : 0.15;
 
-  if (ratio < 0.12) return 'short';
-  if (ratio > 0.18) return 'long';
+  if (ratio < 0.11) return 'short';
+  if (ratio > 0.17) return 'long';
   return 'moderate';
 }
 
-/**
- * 综合特征分类
- */
+// ============================================================
+// 综合分析
+// ============================================================
 export function analyzeFeatures(
   landmarks: FaceLandmark[],
   proportions: Proportions,
